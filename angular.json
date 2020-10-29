@@ -123,6 +123,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "Confusion"
+    }
+  },
+  "defaultProject": "Confusion",
+  "cli": {
+    "analytics": false
+  }
 }
