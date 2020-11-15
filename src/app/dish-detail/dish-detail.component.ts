@@ -1,9 +1,12 @@
+import { Comment } from './../shared/comment';
 import { DishService } from './../services/dish.service';
 import { Dish } from './../shared/dish';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import {FormBuilder,FormGroup, NgForm, Validators} from '@angular/forms';
 import {Params, ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {switchMap} from 'rxjs/operators';
+import { Console } from 'console';
 
 
 @Component({
@@ -18,9 +21,36 @@ export class DishDetailComponent implements OnInit {
   prev: string;
   next: string;
 
+
+  ratingForm: FormGroup;
+  @ViewChild('fform') ratingFormDirective:NgForm;
+
+  formErrors = {
+    'author' : '',
+    'comment' : ''
+  };
+
+  validationMessages = {
+    'author' : {
+      'required' : 'Author name is required',
+      'minlength' : 'Author name  must be at least 2 characters long'
+    },
+    'comment' : {
+      'required' : 'Comment is required',
+      'minlength' : 'Comment must be at least 2 characters long'
+    }
+  
+  };
+
+
+
+
   constructor(private dishService: DishService,
     private location: Location,
-    private route: ActivatedRoute) { }
+    private route: ActivatedRoute,
+    private fb: FormBuilder) {
+      this.createForm();
+     }
 
   ngOnInit(): void {
    this.dishService.getDishIds()
@@ -29,7 +59,8 @@ export class DishDetailComponent implements OnInit {
    this.route.params
    .pipe(switchMap((params: Params) => this.dishService.getDish(params['id']) ))
    
-   this.route.params.pipe(switchMap((params: Params) => this.dishService.getDish(params['id']) ))
+   this.route.params
+   .pipe(switchMap((params: Params) => this.dishService.getDish(params['id']) ))
    .subscribe((dish) => { this.dish = dish; this.setPrevNext(dish.id); });
   }
 
@@ -42,5 +73,57 @@ export class DishDetailComponent implements OnInit {
   goBack(): void {
     this.location.back();
   }
+
+  createForm(){
+    this.ratingForm= this.fb.group({
+      author:['',[Validators.required,Validators.minLength(2)]],
+      comment:['',[Validators.required,Validators.minLength(2)]],
+      rating:5
+    });
+
+    this.ratingForm.valueChanges
+      .subscribe(data => this.onValueChanged(data) );
+
+    this.onValueChanged(); 
+
+   }
+
+   onValueChanged(data?: any){
+    if(!this.ratingForm) {return ;}
+    const form = this.ratingForm;
+    for(const field in this.formErrors){
+      if(this.formErrors.hasOwnProperty(field)){
+        // clear previous error message ( if any)
+        this.formErrors[field] = "";
+        const control = form.get(field);
+        if(control && control.dirty && !control.valid){
+          const messages = this.validationMessages[field];
+          for(const key in control.errors){
+            if(control.errors.hasOwnProperty(key)){
+              this.formErrors[field] += messages[key]+' ';
+            }
+          }
+        }
+      }
+    }
+  }
+
+  onSubmit(){
+
+   const com = this.ratingForm.value;
+    com.date = new Date().toISOString();
+
+    this.dish.comments.push(com);
+    
+    this.ratingFormDirective.resetForm();
+
+    this.ratingForm.reset({
+      author:'',
+      comment: '',
+      rating: 5,
+    });
+
+  }
+
 
 }

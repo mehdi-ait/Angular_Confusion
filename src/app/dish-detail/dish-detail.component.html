@@ -42,8 +42,44 @@
                <span matLine>-- {{comment.author}} {{ comment.date | date }}</span> 
             
         </mat-list-item>
-     </mat-list>
+
+        <mat-list-item *ngIf="ratingForm.valid" >
+            
+          <span matLine>{{ratingForm.get('comment').value}}</span> 
+          <span matLine> {{ratingForm.get('rating').value}} Stars</span> 
+          <span matLine>-- {{ratingForm.get('author').value}} </span> 
+       
+   </mat-list-item>
+      </mat-list>
+       
+      <form novalidate [formGroup]="ratingForm"  #fform="ngForm" (ngSubmit)="onSubmit()">
+        <p>
+         <mat-form-field>
+           <input matInput formControlName="author"  placeholder="Name" required/> 
+           <mat-error *ngIf="formErrors.author"> 
+            {{formErrors.author}}
+          </mat-error>
+          </mat-form-field>
+        </p>
+        <p>   
+            <mat-slider formControlName="rating" thumbLabel step="1"  min="1" max="5" tickInterval="1"></mat-slider>       
+        </p>
+        <p>
+        <mat-form-field>
+         <textarea matInput formControlName="comment" rows="10"  placeholder="Your Comment" required></textarea>            
+         <mat-error *ngIf="formErrors.comment"> 
+          {{formErrors.comment}}
+        </mat-error>
+        </mat-form-field>
+       </p>
+       <p>
+        <button type="submit" mat-button class="background-primary text-floral-white"
+        [disabled]="ratingForm.invalid">Submit</button>
+       </p>
+      </form>        
+     
    </div>
+   
 </div>
 
 <div fxFlex [hidden]="dish">
