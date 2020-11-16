@@ -20,7 +20,7 @@ export class DishDetailComponent implements OnInit {
   dishIds: string [];
   prev: string;
   next: string;
-
+  dishCopy: Dish;
   errMess: string;
 
 
@@ -56,13 +56,14 @@ export class DishDetailComponent implements OnInit {
      }
 
   ngOnInit(): void {
-   this.dishService.getDishIds()
-    .subscribe(dishIds => this.dishIds = dishIds);
 
    this.route.params
    .pipe(switchMap((params: Params) => this.dishService.getDish(params['id']) ))
-   .subscribe((dish) => { this.dish = dish; this.setPrevNext(dish.id); },
+   .subscribe((dish) => { this.dish = dish; this.dishCopy = dish; this.setPrevNext(dish.id); },
        errmess => this.errMess = <any>errmess);
+
+    this.dishService.getDishIds()
+     .subscribe(dishIds => this.dishIds = dishIds);
   }
 
   setPrevNext(dishId: string){
@@ -111,13 +112,17 @@ export class DishDetailComponent implements OnInit {
 
   onSubmit(){
 
-   const com = this.ratingForm.value;
+    const com = this.ratingForm.value;
     com.date = new Date().toISOString();
 
-    this.dish.comments.push(com);
+    this.dishCopy.comments.push(com);
+    this.dishService.putDish(this.dishCopy)
+      .subscribe(dish => {
+          this.dish = dish; this.dishCopy = dish;
+      },
+       errmess => { this.dish = null; this.dishCopy = null; this.errMess = <any>errmess; }) ;
     
     this.ratingFormDirective.resetForm();
-
     this.ratingForm.reset({
       author:'',
       comment: '',
