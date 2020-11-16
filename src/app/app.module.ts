@@ -1,3 +1,4 @@
+
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -20,7 +21,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
 import {MatSliderModule} from '@angular/material/slider';
 import {FormsModule} from '@angular/forms';
 import {ReactiveFormsModule} from '@angular/forms';
-
+import {HttpClientModule} from '@angular/common/http';
 
 import 'hammerjs';
 import { MenuComponent } from './menu/menu.component';
@@ -35,11 +36,14 @@ import { ContactComponent } from './contact/contact.component';
 import {DishService} from './services/dish.service';
 import { PromotionService } from './services/promotion.service';
 import { LeaderService } from './services/leader.service';
+import { ProcessHTTPMsgService } from './services/process-httpmsg.service';
+
 
 
 import { AppRoutingModule } from './app-routing/app-routing.module';
 import { LoginComponent } from './login/login.component';
 
+import { baseURL } from './shared/baseurl';
 
 @NgModule({
   declarations: [
@@ -56,6 +60,7 @@ import { LoginComponent } from './login/login.component';
   imports: [
     BrowserModule,
     AppRoutingModule,
+    HttpClientModule,
     BrowserAnimationsModule,
     MatToolbarModule,
     FlexLayoutModule,
@@ -78,7 +83,9 @@ import { LoginComponent } from './login/login.component';
   providers: [
     DishService,
     PromotionService,
-    LeaderService
+    LeaderService,
+    ProcessHTTPMsgService,
+    { provide : 'BaseURL', useValue :baseURL}
   ],
   entryComponents: [
     LoginComponent

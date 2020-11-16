@@ -1,12 +1,12 @@
 import { Comment } from './../shared/comment';
 import { DishService } from './../services/dish.service';
 import { Dish } from './../shared/dish';
-import { Component, Input, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, OnInit, ViewChild, Inject } from '@angular/core';
 import {FormBuilder,FormGroup, NgForm, Validators} from '@angular/forms';
 import {Params, ActivatedRoute} from '@angular/router';
 import {Location} from '@angular/common';
 import {switchMap} from 'rxjs/operators';
-import { Console } from 'console';
+
 
 
 @Component({
@@ -20,6 +20,8 @@ export class DishDetailComponent implements OnInit {
   dishIds: string [];
   prev: string;
   next: string;
+
+  errMess: string;
 
 
   ratingForm: FormGroup;
@@ -48,7 +50,8 @@ export class DishDetailComponent implements OnInit {
   constructor(private dishService: DishService,
     private location: Location,
     private route: ActivatedRoute,
-    private fb: FormBuilder) {
+    private fb: FormBuilder,
+    @Inject('BaseURL') private BaseURL) {
       this.createForm();
      }
 
@@ -58,10 +61,8 @@ export class DishDetailComponent implements OnInit {
 
    this.route.params
    .pipe(switchMap((params: Params) => this.dishService.getDish(params['id']) ))
-   
-   this.route.params
-   .pipe(switchMap((params: Params) => this.dishService.getDish(params['id']) ))
-   .subscribe((dish) => { this.dish = dish; this.setPrevNext(dish.id); });
+   .subscribe((dish) => { this.dish = dish; this.setPrevNext(dish.id); },
+       errmess => this.errMess = <any>errmess);
   }
 
   setPrevNext(dishId: string){
