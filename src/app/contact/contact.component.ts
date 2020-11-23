@@ -1,6 +1,8 @@
+import { delay } from 'rxjs/operators';
+import { FeedbackService } from './../services/feedback.service';
 import { Component, OnInit, ViewChild } from '@angular/core';
 import {FormBuilder,FormGroup, NgForm, Validators} from '@angular/forms';
-import { flyInOut } from '../animations/app.animation';
+import { flyInOut,expand } from '../animations/app.animation';
 
 import { Feedback, ContactType } from './../shared/feedback';
 
@@ -16,15 +18,20 @@ import { Feedback, ContactType } from './../shared/feedback';
     'style' : 'display: block;'
   },
   animations : [
-    flyInOut()
+    flyInOut(),
+    expand()
   ]
 })
 export class ContactComponent implements OnInit {
 
   feedbackForm: FormGroup;
   feedback: Feedback;
+  feedbackErrMess:string;
   contactType= ContactType;
   @ViewChild('fform') feedbackFormDirective:NgForm;
+  show = true;
+  hide=true;
+
 
   formErrors = {
     'firstname' : '',
@@ -54,11 +61,13 @@ export class ContactComponent implements OnInit {
     }
   };
 
-  constructor(private fb: FormBuilder) { 
+  constructor(private fb: FormBuilder,
+        private feedbackService: FeedbackService) { 
     this.createForm();
   }
 
   ngOnInit(): void {
+   
   }
 
   createForm(){
@@ -99,8 +108,16 @@ export class ContactComponent implements OnInit {
   }
 
   onSubmit(){
-    this.feedback = this.feedbackForm.value;
-    console.log(this.feedback);
+
+    this.hide=false;
+
+    this.feedbackService.submitFeedback(this.feedbackForm.value)
+      .subscribe( feedback => { 
+        this.feedback = feedback;
+        setTimeout(()=>{ this.hide=true; }, 5000);
+        },
+        errmess => { this.feedback = null; this.feedbackErrMess = <any>errmess; });
+
     this.feedbackForm.reset({
       firstname:'',
       lastname: '',
